@@ -1,0 +1,72 @@
+
+<html>
+    <head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    
+      <script src="/socket.io/socket.io.js"></script>
+      <link rel="stylesheet" type="text/css" href="/index.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+      
+    
+     
+     <meta charset="utf-8">
+     <title>Register Page</title>
+    </head>
+    <body>  
+    
+    <div class="container">
+        <div class="row">
+          <div class="Absolute-Center is-Responsive">
+            <div id="logo-container">
+              <center><img width=150vh src="/logo/roomie_logo.png"></center>
+            </div>
+            <div class="col-sm-12 col-md-10 col-md-offset-1">
+              <form action="" id="loginForm">
+                  <div class="form-group">
+                    <center><h3>Register Form</h3></center>
+                  </div>
+                <div class="form-group input-group">
+                  <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                  <input class="form-control" type="text" name='username' id='login' placeholder="username"/>          
+                </div>
+                <div class="form-group input-group">
+                  <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                  <input class="form-control" type="password" name='password' id='password' placeholder="password"/>     
+                </div>
+                <div class="form-group input-group">
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                    <input class="form-control" type="rpassword" name='rpassword' id='rpassword' placeholder="repeat password"/>     
+                  </div>
+                <div class="form-group">
+                  <button type="submit" class="btn btn-warning btn-block">Register</button>
+                </div>
+              </form>        
+            </div>  
+          </div>    
+        </div>
+      </div>
+      
+    
+    
+      <script>
+        $(function () {
+          var socket = io();
+          $('#loginForm').submit(function(e){
+            e.preventDefault();
+            socket.emit('loginRequest', JSON.stringify({login: $('#login').val(), password: $('#password').val()}));
+            $('#password').val('');
+            return false;
+          });
+    
+          socket.on('chat message', function(msg){
+            $('#messages').append($('<li>').text(msg));
+          });
+    
+        });
+      </script>
+    
+      <% include footer %>
+    </body>
+    </html>
+    

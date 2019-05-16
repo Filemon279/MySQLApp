@@ -1,0 +1,60 @@
+
+<html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
+  <script src="/socket.io/socket.io.js"></script>
+  <link rel="stylesheet" type="text/css" href="/index.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+
+
+ 
+ <meta charset="utf-8">
+ <title>Roomie</title>
+</head>
+<body>
+
+    <% var data = {success: true, msg: "Nieznajomy!"}; %>
+    <% include header.ejs %>
+  
+    <center><table id="userTable">
+    </table></center>
+
+  <script>
+
+function userAvatar(name, id) {return `<div class="userAvatar" id="${id}"><i class="fas fa-user fa-3x"></i><p class="userName">${name}</p>`}
+
+    $("#userTable").on("click", ".userAvatar",function(event){
+        window.location.href = "/user/"+$(this).attr("id");
+      });
+    $(function () {
+
+      var socket = io();
+      socket.emit('userListRequest');
+
+      socket.on('userList', function(msg){
+
+        userList = JSON.parse(msg);
+        $('#userTable').html("");
+        var innerTableHtml = "<tr>"
+        for(var i = 0; i<userList.length; i++){
+          if(i%5 == 0) innerTableHtml += "</tr><tr>"
+            innerTableHtml += `<td>${userAvatar(userList[i].imie, userList[i].ido)}</td>`
+          console.log(userList[i])
+        }
+        innerTableHtml += "</tr>"
+        $('#userTable').html(innerTableHtml);
+      });
+
+      socket.on('loginSuccess', function(msg){
+        window.location.href = "/user";
+      });
+      
+    });
+  </script>
+
+  <% include footer %>
+</body>
+</html>

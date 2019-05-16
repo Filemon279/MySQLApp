@@ -1,0 +1,199 @@
+#userTable {
+  margin-top: 20vh;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  table-layout: fixed ;
+  text-align: center;
+  margin-left: 10vh;
+  margin-right: 10vh;
+  width: 50%;
+}
+
+#doorTable, #logTable{
+  margin-top: 7vh;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  table-layout: fixed ;
+  text-align: center;
+  margin-left: 10vh;
+  margin-right: 10vh;
+  left: 0%;
+  width: 80%;
+}
+
+#logTable, .adminTable{
+  margin-top: 7vh;
+  height: 40px;
+  overflow: scroll;
+}
+
+#logTableDiv{
+  height: 70%;
+  overflow-y: scroll;
+}
+
+
+#logTable th {
+  position: sticky; top: 0;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #ffcc00;
+  color: black;
+}
+
+.moreLogsPls{
+  background-color: #ffcc00;
+}
+
+.moreLogsPls:hover{
+  background-color: #f4c300;
+}
+.moreLogsPls:active{
+  background-color: #d8ad00;
+}
+
+#logTable td, .adminTable td{
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#logTable tr:nth-child(even), .adminTable tr:nth-child(even){background-color: #f2f2f2;}
+
+#logTable tr:hover, .adminTable tr:hover {background-color: #ddd;}
+
+#userTable td, #userTable th {
+  /*border: 1px solid #ddd;*/
+  padding: 8px;
+  height: 5vh;
+
+}
+
+.split {
+  height: 100%;
+  width: 50%;
+  position: fixed;
+  z-index: 1;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+.left {
+  left: 0;
+}
+
+.right {
+  right: 0;
+}
+
+
+.opened{
+  color: #27ba1d;
+}
+
+.closed{
+  color: #cc2424;
+}
+
+#alertMsgField{
+  color: red;
+}
+
+footer {
+  position:absolute;
+  bottom:0;
+  width:100%;
+  height:60px;   /* Height of the footer */
+}
+
+.headerImg {
+  position: absolute;
+  left: 5%;
+}
+
+.userAvatar, .doorAvatar{
+  padding: 1vh;
+}
+
+.userAvatar:hover, .doorAvatar:hover {
+  box-shadow: 0 0 11px rgba(33,33,33,.2); 
+}
+
+.userAvatar:active, .doorAvatar:active {
+  box-shadow: 0 0 15px rgba(20,20,20,.3); 
+}
+
+.userName {
+  padding-top: 1vh;
+  font-weight: bold;
+}
+
+.header {
+  padding: 0.5vh;
+  height: 8vh;
+  text-align: center;
+  background: #ffcc00;
+  color: black;
+  font-size: 15px;
+}
+
+div.well{
+  height: 250px;
+} 
+
+.Absolute-Center {
+  margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+}
+
+.Absolute-Center.is-Responsive {
+  width: 50%; 
+  height: 95%;
+  min-width: 200px;
+  max-width: 400px;
+  padding: 40px;
+}
+
+#logo-container{
+  margin: auto;
+  margin-bottom: 3vh;
+}
+
+/* Style the tab */
+.tab {
+  margin-top: 7vh;
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #ffcc00;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #f0c20c;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #d4aa00;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}

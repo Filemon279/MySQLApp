@@ -1,0 +1,142 @@
+
+<html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" type="text/css" href="/index.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+
+
+    
+    <meta charset="utf-8">
+    <title>Roomie</title>
+</head>
+<body>
+
+    <% var data = {success: true, msg: "Panie!"}; %>
+    <% include header.ejs %>
+    
+    
+
+    <div class="tab">
+            <button class="tablinks active" onclick="openCity(event, 'Uzytkownicy')">Użytkownicy</button>
+            <button class="tablinks" onclick="openCity(event, 'Sale')">Sale</button>
+            <button class="tablinks" onclick="openCity(event, 'Grupy')">Grupy</button>
+            <button class="tablinks" onclick="openCity(event, 'Logi')">Logi</button>
+            <button class="tablinks" onclick="openCity(event, 'Uczestnicy')">Uczestnicy</button>
+
+          </div>
+          
+            <div id="Uzytkownicy" class="tabcontent">
+                <h3>Użytkownicy</h3>
+                <table id="adminUserTable" class="adminTable"></table>
+            </div>
+
+            <div id="Sale" class="tabcontent">
+                <h3>Sale</h3>
+                <table id="adminRoomTable" class="adminTable"></table>
+            </div>
+
+            <div id="Grupy" class="tabcontent">
+                <h3>Grupy</h3>
+                <form id="addGroupForm">
+                <input name="subject" id="subject" placeholder="przedmiot">
+                <input name="date" id="date" type="datetime" placeholder="data zajec">
+                <input name="count" id="count" placeholder="Licznosc">
+                <input name="roomId" id="roomId" placeholder="Id sali">
+                <input name="teacherId" id="teacherId" placeholder="Id prowadzacego">
+                <input type="submit" value="Submit">
+                </form>
+                <table id="adminGroupTable" class="adminTable"></table>
+            </div>
+
+            <div id="Logi" class="tabcontent">
+                <h3>Logi</h3>
+                <table id="adminLogTable" class="adminTable"></table>
+            </div>
+
+            <div id="Uczestnicy" class="tabcontent">
+                <h3>Uczestnicy</h3>
+                <table id="adminParticipantTable" class="adminTable"></table>
+            </div>
+          
+          <script>
+          function openCity(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+              tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+              tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            if(evt) evt.currentTarget.className += " active";
+          }
+          </script>
+
+
+
+    <script>
+
+
+
+    $(function () {
+        openCity(event, "Uzytkownicy")
+        var socket = io();
+
+        socket.emit('userListRequest');
+        socket.emit('getRooms');
+        socket.emit('getAllGroups');
+
+        $( "#addGroupForm" ).submit(function( event ) {
+            var groupJson = {subject: $("#subject").val(), date: $("#date").val(), count: $("#count").val(), roomId: $("#roomId").val(), teacherId: $("#teacherId").val()}
+            socket.emit('addGroup', JSON.stringify(groupJson));
+            event.preventDefault();
+        });
+
+        socket.on('userList', function(msg){
+            userList = JSON.parse(msg);
+            $('#adminUserTable').html("");
+            var innerTableHtml = "<thead><tr><th>Id</th><th>Imię</th><th>Nazwisko</th><th>St. Dostępu</th></tr></thead><tbody>";
+            for(var i = 0; i<userList.length; i++){
+                innerTableHtml += `<tr><td>${userList[i].ido}</td><td>${userList[i].imie}</td><td>${userList[i].nazwisko}</td><td>${userList[i].st_dostepu}</td></tr>`
+            }
+            innerTableHtml += "</tr>"
+            $('#adminUserTable').html(innerTableHtml);
+        });
+
+        socket.on('roomList', function(msg){
+            roomList = JSON.parse(msg);
+            $('#adminRoomTable').html("");
+            var innerTableHtml = "<thead><tr><th>Id</th><th>Numer</th><th>St. Dostępu</th></tr></thead><tbody>";
+            for(var i = 0; i<roomList.length; i++){
+                innerTableHtml += `<tr><td>${roomList[i].ids}</td><<td>${roomList[i].numer}</td><td>${roomList[i].st_dostepu}</td></tr>`
+            }
+            innerTableHtml += "</tr>"
+            $('#adminRoomTable').html(innerTableHtml);
+        });
+
+        socket.on('groupAllList', function(msg){
+            groupList = JSON.parse(msg);
+            $('#adminGroupTable').html("");
+            var innerTableHtml = "<thead><tr><th>Id</th><th>Przedmiot</th><th>Data Zajec</th><th>Licznosc</th><th>ID Sali</th><th>Id Prowadzącego</th></tr></thead><tbody>";
+            for(var i = 0; i<groupList.length; i++){
+                innerTableHtml += `<tr><td>${groupList[i].idg}</td><td>${groupList[i].przedmiot}</td><td>${groupList[i].data}</td><td>${groupList[i].licznosc}</td><td>${groupList[i].s_id}</td><td>${groupList[i].p_id}</td></tr>`
+                console.log(groupList[i])
+            }
+            innerTableHtml += "</tr>"
+            $('#adminGroupTable').html(innerTableHtml);
+        });
+        
+    });
+    </script>
+
+    <% include footer %>
+</body>
+</html>
+        

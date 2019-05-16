@@ -1,0 +1,15 @@
+<!-- Navigation -->
+<div class="header">
+
+        <img class="headerImg" width=120vh src="/logo/roomie_logo.png">
+
+        <% if(data.success)  { %> 
+
+            <h2>Witaj <b><%= data.msg %></b></h2>
+          
+            <% } else{ %>
+                <h2><%= data.msg %></h2>
+              <% } %>
+
+        
+    </div>
