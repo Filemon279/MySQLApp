@@ -3,10 +3,15 @@
 <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+
+    <script src="/js/bootstrap-datetimepicker.js"></script>
+    <script src="/js/bootstrap-datetimepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-datetimepicker.css">
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-datetimepicker.min.css">
 
     <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" type="text/css" href="/index.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
 
 
@@ -32,38 +37,67 @@
           
             <div id="Uzytkownicy" class="tabcontent">
                 <h3>Użytkownicy</h3>
-                <table id="adminUserTable" class="adminTable"></table>
+                <form id="addUserForm">
+                        <input name="name" id="name" placeholder="imie">
+                        <input name="surname" id="surname" placeholder="nazwisko">
+                        <input name="accessLevel" id="userAccessLevel" placeholder="st. dostepu">
+                        <input type="submit" value="Submit">
+                </form>
+                <div id="adminLogTableDiv"><table id="adminUserTable" class="adminTable"></table></div>
             </div>
 
             <div id="Sale" class="tabcontent">
                 <h3>Sale</h3>
-                <table id="adminRoomTable" class="adminTable"></table>
+                <form id="addRoomForm">
+                        <input name="number" id="number" placeholder="numer">
+                        <input name="accessLevel" id="roomAccessLevel" placeholder="st. dostepu">
+                        <input type="submit" value="Dodaj">
+                </form>
+                <div id="adminLogTableDiv"><table id="adminRoomTable" class="adminTable"></table></div>
             </div>
 
             <div id="Grupy" class="tabcontent">
-                <h3>Grupy</h3>
-                <form id="addGroupForm">
-                <input name="subject" id="subject" placeholder="przedmiot">
-                <input name="date" id="date" type="datetime" placeholder="data zajec">
-                <input name="count" id="count" placeholder="Licznosc">
-                <input name="roomId" id="roomId" placeholder="Id sali">
-                <input name="teacherId" id="teacherId" placeholder="Id prowadzacego">
-                <input type="submit" value="Submit">
-                </form>
-                <table id="adminGroupTable" class="adminTable"></table>
-            </div>
+                    <h3>Grupy</h3>
+                    <form id="addGroupForm">
+                    <input name="subject" id="subject" placeholder="przedmiot">
+                    <input size="16" type="text" value="2012-06-15 14:45" id="date" readonly class="form_datetime">
+                    <input name="count" id="count" type="number" value="12" min="2" max="64" placeholder="Licznosc">
+                    <select name="roomId" id="roomId">  </select>
+                    <!-- <input name="roomId" id="roomId" placeholder="Id sali"> -->
+                    <select name="teacherId" id="teacherId">  </select>
+                    <input type="submit" value="Submit">
+                    </form>
+                    <div id="adminLogTableDiv">
+                        <table id="adminGroupTable" class="adminTable"></table>
+                    </div>
+                </div>
 
-            <div id="Logi" class="tabcontent">
-                <h3>Logi</h3>
-                <table id="adminLogTable" class="adminTable"></table>
+                <div id="Logi" class="tabcontent">
+                    <h3>Logi</h3>
+                    <div id="adminLogTableDiv"><table id="adminLogTable" class="adminTable"></table>
+                </div>
+
             </div>
 
             <div id="Uczestnicy" class="tabcontent">
                 <h3>Uczestnicy</h3>
-                <table id="adminParticipantTable" class="adminTable"></table>
+                <form id="addParticipantForm">
+                        Grupa: <select name="groupId" id="groupId"></select>
+                        <-- Uczestnik:  <select name="studentId" id="studentId">  </select>
+                        <input type="submit" value="Dodaj">
+                </form>
+                <div id="adminLogTableDiv"><table id="adminParticipantTable" class="adminTable"></table>
             </div>
           
           <script>
+
+            $(".form_datetime").datetimepicker({
+                format: 'yyyy-mm-dd hh:ii:ss',
+                todayBtn: true,
+                startDate: "2019-05-15 10:00",
+                autoclose: true,
+                minuteStep: 10});
+  
           function openCity(evt, tabName) {
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tabcontent");
@@ -84,14 +118,24 @@
     <script>
 
 
+    function loadMoreLogs() {}
 
     $(function () {
         openCity(event, "Uzytkownicy")
         var socket = io();
+        var logLimit = 20;
+
+        loadMoreLogs = () => {
+            logLimit+=20
+            socket.emit('adminLogListRequest', logLimit);
+          }
 
         socket.emit('userListRequest');
         socket.emit('getRooms');
         socket.emit('getAllGroups');
+        socket.emit('teacherListRequest');
+        socket.emit('adminLogListRequest', logLimit);
+        socket.emit('subjectListRequest');
 
         $( "#addGroupForm" ).submit(function( event ) {
             var groupJson = {subject: $("#subject").val(), date: $("#date").val(), count: $("#count").val(), roomId: $("#roomId").val(), teacherId: $("#teacherId").val()}
@@ -99,34 +143,93 @@
             event.preventDefault();
         });
 
+        $( "#addParticipantForm" ).submit(function( event ) {
+            var groupJson = {g_id: $("#groupId").val(), s_id: $("#studentId").val()}
+            socket.emit('addParticipant', JSON.stringify(groupJson));
+            event.preventDefault();
+        });
+        
+        $( "#addRoomForm" ).submit(function( event ) {
+            var roomJson = {number: $("#number").val(), accessLevel: $("#roomAccessLevel").val()}
+            event.preventDefault();
+            console.log(roomJson)
+            socket.emit('addRoom', JSON.stringify(roomJson));
+            $("#number").val('')
+            $("#roomAccessLevel").val('')
+        });
+
+        socket.on('errorMsg', function(msg){
+            alert(msg)
+        });
+
+        socket.on('teacherList', function(msg){
+            var teacherList = JSON.parse(msg);
+            $("#teacherId").html("");
+            for(var i = 0; i<teacherList.length; i++){
+                $("#teacherId").append(`<option value="${teacherList[i].ido}">${teacherList[i].imie} ${teacherList[i].nazwisko} [${teacherList[i].ido}] </option>`)
+            }
+        });
+
+        socket.on('subjectList', function(msg){
+            var subjects = JSON.parse(msg);
+              console.log(subjects)
+              var innerTableHtml = "<thead><tr><th>Imie Nazwisko</th><th>Przedmiot</th><th>Sala</th><th>Prowadzacy</th><th>Data</th></tr></thead><tbody>";
+              for(var i = 0; i<subjects.length; i++){
+                  innerTableHtml += `
+                    <tr><td>${subjects[i].imie} ${subjects[i].nazwisko}</td>
+                    <td>${subjects[i].przedmiot}</td>
+                    <td>${subjects[i].sala}</td>
+                    <td>${subjects[i].wImie} ${subjects[i].wNazwisko}</td>
+                    <td>${subjects[i].data}</td></tr>`
+              }
+              $('#adminParticipantTable').html(innerTableHtml);
+        });
+
+        socket.on('adminLogList', function(msg){
+            logs = JSON.parse(msg);
+              console.log(logs)
+              var innerTableHtml = "<thead><tr><th>Data</th><th>Info</th><th>Imię Nazwisko</th><th>UserId</th></tr></thead><tbody>";
+              for(var i = 0; i<logs.length; i++){
+                  innerTableHtml += `<tr><td>${logs[i].data}</td><td>${logs[i].akcja}</td><td>${logs[i].imie} ${logs[i].nazwisko}</td><td>${logs[i].o_id}</td></tr>`
+              }
+              innerTableHtml += "<tr><td class='moreLogsPls' onClick='loadMoreLogs()' colspan='4'>Proszę o więcej logów</td></tr></tbody>"
+              $('#adminLogTable').html(innerTableHtml);
+        });
+
         socket.on('userList', function(msg){
-            userList = JSON.parse(msg);
+            var userList = JSON.parse(msg);
             $('#adminUserTable').html("");
+            $("#studentId").html("");
             var innerTableHtml = "<thead><tr><th>Id</th><th>Imię</th><th>Nazwisko</th><th>St. Dostępu</th></tr></thead><tbody>";
             for(var i = 0; i<userList.length; i++){
                 innerTableHtml += `<tr><td>${userList[i].ido}</td><td>${userList[i].imie}</td><td>${userList[i].nazwisko}</td><td>${userList[i].st_dostepu}</td></tr>`
+                $("#studentId").append(`<option value="${userList[i].ido}">${userList[i].imie} ${userList[i].nazwisko} [${userList[i].ido}]</option>`)
             }
             innerTableHtml += "</tr>"
             $('#adminUserTable').html(innerTableHtml);
         });
 
         socket.on('roomList', function(msg){
-            roomList = JSON.parse(msg);
+            var roomList = JSON.parse(msg);
             $('#adminRoomTable').html("");
+            $("#roomId").html("");
             var innerTableHtml = "<thead><tr><th>Id</th><th>Numer</th><th>St. Dostępu</th></tr></thead><tbody>";
             for(var i = 0; i<roomList.length; i++){
                 innerTableHtml += `<tr><td>${roomList[i].ids}</td><<td>${roomList[i].numer}</td><td>${roomList[i].st_dostepu}</td></tr>`
+                $("#roomId").append(`<option value="${roomList[i].ids}">${roomList[i].numer} [${roomList[i].ids}]</option>`)
             }
             innerTableHtml += "</tr>"
             $('#adminRoomTable').html(innerTableHtml);
         });
 
         socket.on('groupAllList', function(msg){
-            groupList = JSON.parse(msg);
+            var groupList = JSON.parse(msg);
             $('#adminGroupTable').html("");
+            $("#groupId").html("");
             var innerTableHtml = "<thead><tr><th>Id</th><th>Przedmiot</th><th>Data Zajec</th><th>Licznosc</th><th>ID Sali</th><th>Id Prowadzącego</th></tr></thead><tbody>";
             for(var i = 0; i<groupList.length; i++){
                 innerTableHtml += `<tr><td>${groupList[i].idg}</td><td>${groupList[i].przedmiot}</td><td>${groupList[i].data}</td><td>${groupList[i].licznosc}</td><td>${groupList[i].s_id}</td><td>${groupList[i].p_id}</td></tr>`
+                $("#groupId").append(`<option value="${groupList[i].idg}">${groupList[i].przedmiot} [${groupList[i].idg}]</option>`)
                 console.log(groupList[i])
             }
             innerTableHtml += "</tr>"

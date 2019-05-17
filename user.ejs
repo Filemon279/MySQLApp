@@ -3,10 +3,10 @@
     <head>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
-    
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+
       <script src="/socket.io/socket.io.js"></script>
       <link rel="stylesheet" type="text/css" href="/index.css">
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
       <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
 
      <meta charset="utf-8">
@@ -37,7 +37,6 @@
         <div class="split left">
             <div class="centered">
                 <table id="doorTable"></table>
-
             </div>
           </div>
           
@@ -46,31 +45,28 @@
                 <table id="logTable"><tr><th>Data</th><th>Info</th></tr></table>
             </div>
           </div>
-
-
     
       <script>
 
         function doorAvatar(name, id) {return `<div class="doorAvatar" id="${id}"><i class="fas fa-door-closed fa-3x"></i><p class="userName">${name}</p>`}
 
         function loadMoreLogs() {}
+
         $(function () {
           var socket = io();
           var logLimit = 20;
+          var userId = "<% if(locals.user)  { %> <%- locals.user.ido %> <% } %>"
 
           loadMoreLogs = () => {
             logLimit+=20
             socket.emit('userLogsRequest', userId, logLimit);
           }
 
-          var userId = "<% if(locals.user)  { %> <%- locals.user.ido %> <% } %>"
           $("#doorTable").on("click", ".doorAvatar",function(event){
-            socket.emit('openDoor', JSON.stringify({userId: userId, doorId: $(this).attr("id")}));
+            socket.emit('openDoor', JSON.stringify({userId: userId, doorId: $(this).attr("id"), limit: logLimit}));
           });
-
-          //socket.emit('loginRequest', JSON.stringify({login: $('#login').val(), password: $('#password').val()}));
           
-          console.log(userId)
+          
           socket.emit('getRooms');
 
           socket.on('roomList', function(msg){
@@ -83,38 +79,35 @@
               }
               innerTableHtml += "</tr>"
               $('#doorTable').html(innerTableHtml);
-              socket.emit('userPermissionsRequest', userId);
               socket.emit('userLogsRequest', userId, logLimit);
-
+              socket.emit('userPermissionsRequest', userId);
           });
 
           socket.on('userPermissions', function(msg){
               permissions = JSON.parse(msg);
+              console.log(permissions);
               $(".doorAvatar").each( (index, elem) => {
-                if(permissions.filter(e => e.ids == $(elem).attr("id")).length > 0) $("i", elem).toggleClass("opened");
-                else $("i", elem).toggleClass("closed");
+                if(permissions.filter(e => e.ids == $(elem).attr("id")).length > 0) $(elem).addClass("opened");
+                else $(elem).addClass("closed");
               })
           });
 
           socket.on('userLogs', function(msg){
               logs = JSON.parse(msg);
-              console.log(logs)
               var innerTableHtml = "<thead><tr><th>Data</th><th>Info</th></tr></thead><tbody>";
               for(var i = 0; i<logs.length; i++){
                   innerTableHtml += `<tr><td>${logs[i].data}</td><td>${logs[i].akcja}</td></tr>`
               }
               innerTableHtml += "<tr><td class='moreLogsPls' onClick='loadMoreLogs()' colspan='2'>Proszę o więcej logów</td></tr></tbody>"
-
               $('#logTable').html(innerTableHtml);
-
           });
-          
-          
     
         });
+
       </script>
     
       <% include footer %>
+
     </body>
     </html>
     

@@ -23,17 +23,19 @@
 
 #logTable, .adminTable{
   margin-top: 7vh;
+  margin-left: 0;
   height: 40px;
+  width: 90%;
   overflow: scroll;
 }
 
-#logTableDiv{
-  height: 70%;
+#logTableDiv, #adminLogTableDiv{
+  height: 55%;
   overflow-y: scroll;
 }
 
 
-#logTable th {
+#logTable th, .adminTable th {
   position: sticky; top: 0;
   padding-top: 12px;
   padding-bottom: 12px;
