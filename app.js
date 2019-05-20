@@ -9,10 +9,10 @@ var loggedIn = [];
 var port = 3001;
 
 var con = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "resett",
-  database: "projektSQL"
+  host: "serwer1895835.home.pl",
+  user: "29158242_projektsql",
+  password: "projektsql",
+  database: "29158242_projektsql"
 });
 
 con.connect(function(err) {
