@@ -101,7 +101,6 @@ io.on('connection', function(socket){
     socket.on('userListRequest', function(){
         con.query(`SELECT * FROM osoba`, function (err, result, fields) {
           if (err) {socket.emit('errorMsg', err.sqlMessage); return}
-        //console.log(JSON.stringify(result))
         socket.emit('userList', JSON.stringify(result))
         });
       });
@@ -115,6 +114,28 @@ io.on('connection', function(socket){
         con.query(`INSERT INTO sala (numer, st_dostepu) VALUES ('${roomData.number}', '${roomData.accessLevel}')`, function (err, result, fields) {
           if (err) {socket.emit('errorMsg', err.sqlMessage); return}
           getAllRooms();
+        });
+      });
+      
+//SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_SCHEMA = "29158242_projektsql" AND TABLE_NAME = "osoba";
+
+     socket.on('addStudent', function(data){
+        var userData = JSON.parse(data);
+        con.query(`INSERT INTO osoba (imie, nazwisko, st_dostepu) VALUES ('${userData.name}', '${userData.surname}', '${userData.accessLevel}')`, function (err, result, fields) {
+          if (err) {socket.emit('errorMsg', err.sqlMessage); return}
+          con.query(`INSERT INTO student (o_id, nr_indeksu) VALUES ('${result.insertId}', '${userData.indexNumber}')`, function (err, result, fields) {
+				if (err) {socket.emit('errorMsg', err.sqlMessage); return}
+			});
+        });
+      });
+      
+      socket.on('addTeacher', function(data){
+        var userData = JSON.parse(data);
+        con.query(`INSERT INTO osoba (imie, nazwisko, st_dostepu) VALUES ('${userData.name}', '${userData.surname}', '${userData.accessLevel}')`, function (err, result, fields) {
+          if (err) {socket.emit('errorMsg', err.sqlMessage); return}
+          con.query(`INSERT INTO pracownik (o_id, stanowisko) VALUES ('${result.insertId}', '${userData.position}')`, function (err, result, fields) {
+				if (err) {socket.emit('errorMsg', err.sqlMessage); return}
+			});
         });
       });
 
@@ -161,7 +182,6 @@ io.on('connection', function(socket){
       socket.on('getRooms', function(){
         con.query(`SELECT * FROM sala`, function (err, result, fields) {
             if (err) {socket.emit('errorMsg', err.sqlMessage); return}
-        //console.log(JSON.stringify(result))
         socket.emit('roomList', JSON.stringify(result))
         });
       });

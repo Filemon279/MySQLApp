@@ -37,12 +37,19 @@
           
             <div id="Uzytkownicy" class="tabcontent">
                 <h3>Użytkownicy</h3>
-                <form id="addUserForm">
-                        <input name="name" id="name" placeholder="imie">
-                        <input name="surname" id="surname" placeholder="nazwisko">
-                        <input name="accessLevel" id="userAccessLevel" placeholder="st. dostepu">
-                        <input type="submit" value="Submit">
+                <input name="name" id="name" placeholder="imie">
+				<input name="surname" id="surname" placeholder="nazwisko">
+				<input name="accessLevel" id="userAccessLevel" placeholder="st. dostepu"><br><br>
+				
+                <form id="addStudentForm">
+                        <input name="indexNumber" id="indexNumber" placeholder="numer undeksu">                        
+                        <input type="submit" value="Dodaj studenta">
                 </form>
+                 <form id="addTeacherForm">
+                        <input name="position" id="position" placeholder="stanowisko">                        
+                        <input type="submit" value="Dodaj pracownika">
+                </form>
+                
                 <div id="adminLogTableDiv"><table id="adminUserTable" class="adminTable"></table></div>
             </div>
 
@@ -142,6 +149,19 @@
             socket.emit('addGroup', JSON.stringify(groupJson));
             event.preventDefault();
         });
+
+        $( "#addStudentForm" ).submit(function( event ) {
+            var groupJson = {name: $("#name").val(), surname: $("#surname").val(), indexNumber: $("#indexNumber").val(), accessLevel: $("#userAccessLevel").val()}
+            socket.emit('addStudent', JSON.stringify(groupJson));
+            event.preventDefault();
+        });
+
+        $( "#addTeacherForm" ).submit(function( event ) {
+            var groupJson = {name: $("#name").val(), surname: $("#surname").val(), position: $("#position").val(), accessLevel: $("#userAccessLevel").val()}
+            socket.emit('addTeacher', JSON.stringify(groupJson));
+            event.preventDefault();
+        });
+
 
         $( "#addParticipantForm" ).submit(function( event ) {
             var groupJson = {g_id: $("#groupId").val(), s_id: $("#studentId").val()}
