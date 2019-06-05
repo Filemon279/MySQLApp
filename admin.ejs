@@ -119,18 +119,14 @@
             if(evt) evt.currentTarget.className += " active";
           }
           </script>
-
-
-
     <script>
-
 
     function loadMoreLogs() {}
 
     $(function () {
         openCity(event, "Uzytkownicy")
         var socket = io();
-        var logLimit = 20;
+        var logLimit = 10;
 
         loadMoreLogs = () => {
             logLimit+=20
@@ -144,6 +140,22 @@
         socket.emit('adminLogListRequest', logLimit);
         socket.emit('subjectListRequest');
 
+        function checkAddUser(){
+            if( $("#name").val() == "" ) {
+                alert("Proszę podać imię");
+                return 1;
+            }
+            if( $("#surname").val() == "" ) {
+                alert("Proszę podać nazwisko");
+                return 1;
+            }
+            if( $("#userAccessLevel").val() == "" ){
+                alert("Proszę podać poziom dostepu");
+                return 1;
+            } 
+            return 0;
+        }
+
         $( "#addGroupForm" ).submit(function( event ) {
             var groupJson = {subject: $("#subject").val(), date: $("#date").val(), count: $("#count").val(), roomId: $("#roomId").val(), teacherId: $("#teacherId").val()}
             socket.emit('addGroup', JSON.stringify(groupJson));
@@ -151,15 +163,25 @@
         });
 
         $( "#addStudentForm" ).submit(function( event ) {
+            event.preventDefault();
+            if(checkAddUser()) return;
+            if( $("#indexNumber").val() == "" ){
+                alert("Proszę podać numer indeksu");
+                return 1;
+            } 
             var groupJson = {name: $("#name").val(), surname: $("#surname").val(), indexNumber: $("#indexNumber").val(), accessLevel: $("#userAccessLevel").val()}
             socket.emit('addStudent', JSON.stringify(groupJson));
-            event.preventDefault();
         });
 
         $( "#addTeacherForm" ).submit(function( event ) {
+            event.preventDefault();
+            if(checkAddUser()) return;
+            if( $("#position").val() == "" ){
+                alert("Proszę podać stanowisko");
+                return 1;
+            } 
             var groupJson = {name: $("#name").val(), surname: $("#surname").val(), position: $("#position").val(), accessLevel: $("#userAccessLevel").val()}
             socket.emit('addTeacher', JSON.stringify(groupJson));
-            event.preventDefault();
         });
 
 
@@ -167,6 +189,13 @@
             var groupJson = {g_id: $("#groupId").val(), s_id: $("#studentId").val()}
             socket.emit('addParticipant', JSON.stringify(groupJson));
             event.preventDefault();
+        });
+        $( "body" ).on("click", "#removeRoom",function(event){
+            socket.emit('removeRoom', this.getAttribute("ids"));
+        });
+
+        $( "body" ).on("click", "#removeParticipant",function(event){
+            socket.emit('removeParticipant', this.getAttribute("idu"));
         });
         
         $( "#addRoomForm" ).submit(function( event ) {
@@ -193,14 +222,14 @@
         socket.on('subjectList', function(msg){
             var subjects = JSON.parse(msg);
               console.log(subjects)
-              var innerTableHtml = "<thead><tr><th>Imie Nazwisko</th><th>Przedmiot</th><th>Sala</th><th>Prowadzacy</th><th>Data</th></tr></thead><tbody>";
+              var innerTableHtml = "<thead><tr><th>Imie Nazwisko</th><th>Przedmiot</th><th>Sala</th><th>Prowadzacy</th><th>Data</th><th>Usuń</th></tr></thead><tbody>";
               for(var i = 0; i<subjects.length; i++){
                   innerTableHtml += `
                     <tr><td>${subjects[i].imie} ${subjects[i].nazwisko}</td>
                     <td>${subjects[i].przedmiot}</td>
                     <td>${subjects[i].sala}</td>
                     <td>${subjects[i].wImie} ${subjects[i].wNazwisko}</td>
-                    <td>${subjects[i].data}</td></tr>`
+                    <td>${subjects[i].data}</td><td><button id="removeParticipant" idu=${subjects[i].idu}>Usuń</button></td></tr>`
               }
               $('#adminParticipantTable').html(innerTableHtml);
         });
@@ -208,11 +237,11 @@
         socket.on('adminLogList', function(msg){
             logs = JSON.parse(msg);
               console.log(logs)
-              var innerTableHtml = "<thead><tr><th>Data</th><th>Info</th><th>Imię Nazwisko</th><th>UserId</th></tr></thead><tbody>";
+              var innerTableHtml = "<thead><tr><th>Data</th><th>Info</th><th>Numer Sali</th><th>Imię Nazwisko</th><th>UserId</th></tr></thead><tbody>";
               for(var i = 0; i<logs.length; i++){
-                  innerTableHtml += `<tr><td>${logs[i].data}</td><td>${logs[i].akcja}</td><td>${logs[i].imie} ${logs[i].nazwisko}</td><td>${logs[i].o_id}</td></tr>`
+                  innerTableHtml += `<tr><td>${logs[i].data}</td><td>${logs[i].akcja}</td><td>${logs[i].numer}</td><td>${logs[i].imie} ${logs[i].nazwisko}</td><td>${logs[i].o_id}</td></tr>`
               }
-              innerTableHtml += "<tr><td class='moreLogsPls' onClick='loadMoreLogs()' colspan='4'>Proszę o więcej logów</td></tr></tbody>"
+              innerTableHtml += "<tr><td class='moreLogsPls' onClick='loadMoreLogs()' colspan='5'>Proszę o więcej logów</td></tr></tbody>"
               $('#adminLogTable').html(innerTableHtml);
         });
 
@@ -233,9 +262,9 @@
             var roomList = JSON.parse(msg);
             $('#adminRoomTable').html("");
             $("#roomId").html("");
-            var innerTableHtml = "<thead><tr><th>Id</th><th>Numer</th><th>St. Dostępu</th></tr></thead><tbody>";
+            var innerTableHtml = "<thead><tr><th>Id</th><th>Numer</th><th>St. Dostępu</th><th>Usuń</th></tr></thead><tbody>";
             for(var i = 0; i<roomList.length; i++){
-                innerTableHtml += `<tr><td>${roomList[i].ids}</td><<td>${roomList[i].numer}</td><td>${roomList[i].st_dostepu}</td></tr>`
+                innerTableHtml += `<tr><td>${roomList[i].ids}</td><<td>${roomList[i].numer}</td><td>${roomList[i].st_dostepu}</td><td><button id="removeRoom" ids=${roomList[i].ids}>Usuń</button></td></tr>`
                 $("#roomId").append(`<option value="${roomList[i].ids}">${roomList[i].numer} [${roomList[i].ids}]</option>`)
             }
             innerTableHtml += "</tr>"
@@ -246,9 +275,10 @@
             var groupList = JSON.parse(msg);
             $('#adminGroupTable').html("");
             $("#groupId").html("");
-            var innerTableHtml = "<thead><tr><th>Id</th><th>Przedmiot</th><th>Data Zajec</th><th>Licznosc</th><th>ID Sali</th><th>Id Prowadzącego</th></tr></thead><tbody>";
+            var innerTableHtml = "<thead><tr><th>Id</th><th>Przedmiot</th><th>Data Zajec</th><th>Licznosc</th><th>Numer sali</th><th>Prowadzący</th></tr></thead><tbody>";
             for(var i = 0; i<groupList.length; i++){
-                innerTableHtml += `<tr><td>${groupList[i].idg}</td><td>${groupList[i].przedmiot}</td><td>${groupList[i].data}</td><td>${groupList[i].licznosc}</td><td>${groupList[i].s_id}</td><td>${groupList[i].p_id}</td></tr>`
+                innerTableHtml += `<tr><td>${groupList[i].idg}</td><td>${groupList[i].przedmiot}</td><td>${groupList[i].data}</td><td>${groupList[i].licznosc}</td>
+                    <td>${groupList[i].numer}</td><td>${groupList[i].imie} ${groupList[i].nazwisko}</td></tr>`
                 $("#groupId").append(`<option value="${groupList[i].idg}">${groupList[i].przedmiot} [${groupList[i].idg}]</option>`)
                 console.log(groupList[i])
             }
@@ -257,6 +287,7 @@
         });
         
     });
+
     </script>
 
     <% include footer %>

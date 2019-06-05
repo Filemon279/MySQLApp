@@ -54,11 +54,11 @@
 
         $(function () {
           var socket = io();
-          var logLimit = 20;
+          var logLimit = 10;
           var userId = "<% if(locals.user)  { %> <%- locals.user.ido %> <% } %>"
 
           loadMoreLogs = () => {
-            logLimit+=20
+            logLimit+=10
             socket.emit('userLogsRequest', userId, logLimit);
           }
 
